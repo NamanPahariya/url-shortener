@@ -1,0 +1,19 @@
+{
+  "name": "url-shortener",
+  "private": true,
+  "version": "1.0.0",
+  "type": "commonjs",
+  "description": "Express.js URL shortener backend with an in-memory store.",
+  "main": "src/server.js",
+  "scripts": {
+    "dev": "node --watch src/server.js",
+    "start": "node src/server.js",
+    "lint": "node --check src/server.js",
+    "test": "node --test tests/backend/*.test.cjs",
+    "test:watch": "node --test --watch tests/backend/*.test.cjs"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2"
+  }
+}
