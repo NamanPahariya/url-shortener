@@ -1,4 +1,8 @@
-const { createRecord, findByCode } = require('../store/urlStore');
+const {
+  createRecord,
+  deleteByCode,
+  findByCode,
+} = require('../store/urlStore');
 const { generateCode } = require('../utils/generateCode');
 
 function createShortUrl(originalUrl) {
@@ -24,7 +28,12 @@ function findOriginalUrlByCode(code) {
   return findByCode(code);
 }
 
+function deleteShortUrlByCode(code) {
+  return deleteByCode(code);
+}
+
 module.exports = {
   createShortUrl,
+  deleteShortUrlByCode,
   findOriginalUrlByCode,
 };

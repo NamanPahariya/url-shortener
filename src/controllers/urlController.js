@@ -1,5 +1,6 @@
 const {
   createShortUrl,
+  deleteShortUrlByCode,
   findOriginalUrlByCode,
 } = require('../services/urlShortenerService');
 const { isValidHttpUrl } = require('../utils/isValidHttpUrl');
@@ -45,7 +46,30 @@ function resolveShortCode(req, res, next) {
   }
 }
 
+function deleteShortCode(req, res, next) {
+  try {
+    const { code } = req.params;
+    const record = deleteShortUrlByCode(code);
+
+    if (!record) {
+      return res.status(404).json({
+        error: 'Short code not found',
+      });
+    }
+
+    return res.status(200).json({
+      code: record.code,
+      originalUrl: record.originalUrl,
+      shortUrl: record.shortUrl,
+      createdAt: record.createdAt,
+    });
+  } catch (error) {
+    return next(error);
+  }
+}
+
 module.exports = {
+  deleteShortCode,
   shortenUrl,
   resolveShortCode,
 };

@@ -18,7 +18,19 @@ function findByCode(code) {
   return urlsByCode.get(code) || null;
 }
 
+function deleteByCode(code) {
+  const record = urlsByCode.get(code) || null;
+
+  if (!record) {
+    return null;
+  }
+
+  urlsByCode.delete(code);
+  return record;
+}
+
 module.exports = {
   createRecord,
+  deleteByCode,
   findByCode,
 };
