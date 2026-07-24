@@ -5,6 +5,6 @@ const { config } = require('./config');
 
 const app = createApp();
 
-app.listen(config.port, () => {
-  console.log(`URL shortener API listening on port ${config.port}`);
+app.listen(config.port, config.host, () => {
+  console.log(`URL shortener API listening on ${config.host}:${config.port}`);
 });
