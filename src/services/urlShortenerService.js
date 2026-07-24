@@ -5,13 +5,13 @@ const {
 } = require('../store/urlStore');
 const { generateCode } = require('../utils/generateCode');
 
-function createShortUrl(originalUrl) {
+async function createShortUrl(originalUrl) {
   let code = generateCode();
-  while (findByCode(code)) {
+  while (await findByCode(code)) {
     code = generateCode();
   }
 
-  const record = createRecord({
+  const record = await createRecord({
     code,
     originalUrl,
   });
@@ -24,11 +24,11 @@ function createShortUrl(originalUrl) {
   };
 }
 
-function findOriginalUrlByCode(code) {
+async function findOriginalUrlByCode(code) {
   return findByCode(code);
 }
 
-function deleteShortUrlByCode(code) {
+async function deleteShortUrlByCode(code) {
   return deleteByCode(code);
 }
 

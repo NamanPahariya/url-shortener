@@ -5,7 +5,7 @@ const {
 } = require('../services/urlShortenerService');
 const { isValidHttpUrl } = require('../utils/isValidHttpUrl');
 
-function shortenUrl(req, res, next) {
+async function shortenUrl(req, res, next) {
   try {
     const { url } = req.body || {};
 
@@ -21,7 +21,7 @@ function shortenUrl(req, res, next) {
       });
     }
 
-    const shortUrl = createShortUrl(url);
+    const shortUrl = await createShortUrl(url);
 
     return res.status(201).json(shortUrl);
   } catch (error) {
@@ -29,10 +29,10 @@ function shortenUrl(req, res, next) {
   }
 }
 
-function resolveShortCode(req, res, next) {
+async function resolveShortCode(req, res, next) {
   try {
     const { code } = req.params;
-    const record = findOriginalUrlByCode(code);
+    const record = await findOriginalUrlByCode(code);
 
     if (!record) {
       return res.status(404).json({
@@ -46,10 +46,10 @@ function resolveShortCode(req, res, next) {
   }
 }
 
-function deleteShortCode(req, res, next) {
+async function deleteShortCode(req, res, next) {
   try {
     const { code } = req.params;
-    const record = deleteShortUrlByCode(code);
+    const record = await deleteShortUrlByCode(code);
 
     if (!record) {
       return res.status(404).json({

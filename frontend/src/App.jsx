@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 
 const STORAGE_KEY = 'url-shortener-history';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:3000';
 
 function formatNow() {
   return new Intl.DateTimeFormat(undefined, {
@@ -40,7 +41,7 @@ export default function App() {
 
     setIsSubmitting(true);
     try {
-      const response = await fetch('/api/shorten', {
+      const response = await fetch(`${API_BASE_URL}/api/shorten`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -80,7 +81,7 @@ export default function App() {
   async function handleDelete(item) {
     setDeletingId(item.id);
     try {
-      const response = await fetch(`/api/${item.code}`, {
+      const response = await fetch(`${API_BASE_URL}/api/${item.code}`, {
         method: 'DELETE',
       });
 

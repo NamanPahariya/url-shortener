@@ -1,36 +1,91 @@
 const { config } = require('../config');
+const { getSqlClient } = require('../db/neon');
 
-const urlsByCode = new Map();
+const tableName = 'short_urls';
 
-function createRecord({ code, originalUrl }) {
-  const record = {
-    code,
-    originalUrl,
-    shortUrl: `${config.baseUrl.replace(/\/$/, '')}/api/${code}`,
-    createdAt: new Date().toISOString(),
-  };
+let testSqlClient = null;
 
-  urlsByCode.set(code, record);
+function getSql() {
+  return testSqlClient || getSqlClient();
+}
+
+async function ensureSchema() {
+  const sql = getSql();
+
+  await sql`
+    CREATE TABLE IF NOT EXISTS ${sql.unsafe(tableName)} (
+      code TEXT PRIMARY KEY,
+      original_url TEXT NOT NULL,
+      short_url TEXT NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `;
+}
+
+async function createRecord({ code, originalUrl }) {
+  const sql = getSql();
+  const shortUrl = `${config.baseUrl.replace(/\/$/, '')}/api/${code}`;
+
+  const [record] = await sql`
+    INSERT INTO ${sql.unsafe(tableName)} (code, original_url, short_url)
+    VALUES (${code}, ${originalUrl}, ${shortUrl})
+    RETURNING
+      code,
+      original_url AS "originalUrl",
+      short_url AS "shortUrl",
+      created_at AS "createdAt"
+  `;
+
   return record;
 }
 
-function findByCode(code) {
-  return urlsByCode.get(code) || null;
+async function findByCode(code) {
+  const sql = getSql();
+  const [record] = await sql`
+    SELECT
+      code,
+      original_url AS "originalUrl",
+      short_url AS "shortUrl",
+      created_at AS "createdAt"
+    FROM ${sql.unsafe(tableName)}
+    WHERE code = ${code}
+  `;
+
+  return record || null;
 }
 
-function deleteByCode(code) {
-  const record = urlsByCode.get(code) || null;
+async function deleteByCode(code) {
+  const sql = getSql();
+  const [record] = await sql`
+    DELETE FROM ${sql.unsafe(tableName)}
+    WHERE code = ${code}
+    RETURNING
+      code,
+      original_url AS "originalUrl",
+      short_url AS "shortUrl",
+      created_at AS "createdAt"
+  `;
 
-  if (!record) {
-    return null;
+  return record || null;
+}
+
+async function resetStore() {
+  if (!testSqlClient) {
+    return;
   }
 
-  urlsByCode.delete(code);
-  return record;
+  await testSqlClient`DELETE FROM ${testSqlClient.unsafe(tableName)}`;
+}
+
+function __setTestSqlClient(sql) {
+  testSqlClient = sql;
 }
 
 module.exports = {
+  __setTestSqlClient,
   createRecord,
   deleteByCode,
+  ensureSchema,
   findByCode,
+  resetStore,
 };

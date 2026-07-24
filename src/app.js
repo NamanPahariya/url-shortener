@@ -8,6 +8,26 @@ function createApp() {
 
   app.use(express.json());
 
+  app.use((req, res, next) => {
+    const origin = req.headers.origin;
+    const allowedOrigin = origin === 'http://127.0.0.1:5173' || origin === 'http://localhost:5173'
+      ? origin
+      : null;
+
+    if (allowedOrigin) {
+      res.setHeader('Access-Control-Allow-Origin', allowedOrigin);
+      res.setHeader('Vary', 'Origin');
+      res.setHeader('Access-Control-Allow-Methods', 'GET,POST,DELETE,OPTIONS');
+      res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    }
+
+    if (req.method === 'OPTIONS') {
+      return res.sendStatus(204);
+    }
+
+    return next();
+  });
+
   app.use('/api', healthRouter);
   app.use('/api', urlRouter);
 

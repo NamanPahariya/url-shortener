@@ -7,6 +7,7 @@ const config = {
   port: toNumber(process.env.PORT, 3000),
   host: process.env.HOST || '127.0.0.1',
   baseUrl: process.env.BASE_URL || `http://localhost:${toNumber(process.env.PORT, 3000)}`,
+  databaseUrl: process.env.DATABASE_URL || '',
 };
 
 module.exports = { config };

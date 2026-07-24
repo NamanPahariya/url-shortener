@@ -2,9 +2,19 @@ require('dotenv').config();
 
 const { createApp } = require('./app');
 const { config } = require('./config');
+const { ensureSchema } = require('./store/urlStore');
 
-const app = createApp();
+async function startServer() {
+  await ensureSchema();
 
-app.listen(config.port, config.host, () => {
-  console.log(`URL shortener API listening on ${config.host}:${config.port}`);
+  const app = createApp();
+
+  app.listen(config.port, config.host, () => {
+    console.log(`URL shortener API listening on ${config.host}:${config.port}`);
+  });
+}
+
+startServer().catch((error) => {
+  console.error(error);
+  process.exit(1);
 });
