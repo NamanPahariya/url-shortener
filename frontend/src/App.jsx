@@ -23,6 +23,7 @@ export default function App() {
   });
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [deletingId, setDeletingId] = useState('');
 
   useEffect(() => {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
@@ -56,6 +57,7 @@ export default function App() {
       setHistory((current) => [
         {
           id: crypto.randomUUID(),
+          code: payload.code,
           originalUrl: payload.originalUrl,
           shortUrl: payload.shortUrl,
           createdAt: formatNow(),
@@ -73,6 +75,29 @@ export default function App() {
 
   async function copyToClipboard(value) {
     await navigator.clipboard.writeText(value);
+  }
+
+  async function handleDelete(item) {
+    setDeletingId(item.id);
+    try {
+      const response = await fetch(`/api/${item.code}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok && response.status !== 404) {
+        const payload = await response.json().catch(() => ({}));
+        throw new Error(payload.error || 'Failed to delete short link.');
+      }
+
+      setHistory((current) => current.filter((historyItem) => historyItem.id !== item.id));
+      setError('');
+    } catch (deleteError) {
+      setError(
+        deleteError instanceof Error ? deleteError.message : 'Failed to delete short link.',
+      );
+    } finally {
+      setDeletingId('');
+    }
   }
 
   return (
@@ -138,9 +163,19 @@ export default function App() {
                       {item.shortUrl}
                     </a>
                   </div>
-                  <button type="button" onClick={() => copyToClipboard(item.shortUrl)}>
-                    Copy
-                  </button>
+                  <div className="history-actions">
+                    <button type="button" onClick={() => copyToClipboard(item.shortUrl)}>
+                      Copy
+                    </button>
+                    <button
+                      type="button"
+                      className="danger"
+                      onClick={() => handleDelete(item)}
+                      disabled={deletingId === item.id}
+                    >
+                      {deletingId === item.id ? 'Deleting...' : 'Delete'}
+                    </button>
+                  </div>
                 </div>
                 <p className="meta">Created {item.createdAt}</p>
               </article>
